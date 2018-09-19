@@ -74,41 +74,6 @@ public class ComponentDcpu extends ECSComponent {
         hardware[hardwareSize++] = eid;
     }
 
-    public void load(File file) throws IOException {
-        DataInputStream dis = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
-        int i = 0;
-
-        try {
-            for (; i < ram.length; i++) {
-                ram[i] = dis.readChar();
-            }
-        } catch (IOException e) {
-        }
-
-        Log.info("Boot image: " + i + " words");
-
-        try {
-            dis.close();
-        } catch (IOException e) {
-        }
-
-        for (; i < ram.length; i++) {
-            ram[i] = 0;
-        }
-    }
-
-    public void save(File file) throws IOException {
-        DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
-        try {
-            for (int i = 0; i < ram.length; i++) {
-                dos.writeChar(ram[i]);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        dos.close();
-    }
-
     public DCPUHardware getHardware(char b) {
         if (b < hardwareSize) {
             return (DCPUHardware) World.INSTANCE.getComponent(hardware[b], CompType.DCPUHardware);
