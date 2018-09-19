@@ -5,9 +5,9 @@ import org.megastage.ecs.ECSWorld;
 
 public class Example {
     public static void main(String[] args) {
-        ECSWorld world = new ECSWorld(1000, "org.megastage.ecs");
+        ECSWorld world = new ECSWorld(1000);
 
-        world.add(new ExampleEntitySystem(world, 1000, ExampleComponent.cid));
+        world.addSystem(new ExampleEntitySystem(world, 1000, ExampleComponent.cid));
 
         Element template = new Element("template").setAttribute("name", "ship")
                 .addContent(new Element("entity").setAttribute("name", "ship")
@@ -26,7 +26,7 @@ public class Example {
                                 .setAttribute("value", "AA"))
                 );
 
-        world.add(template);
+        world.addEntityTemplate(template);
         world.spawn("ship");
 
     }

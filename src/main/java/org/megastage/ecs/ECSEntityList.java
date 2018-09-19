@@ -3,34 +3,37 @@ package org.megastage.ecs;
 import java.util.Iterator;
 
 class ECSEntityList implements Iterable<ECSEntity> {
-    private final ECSWorld world;
-
     private ECSNode head = new ECSNode(null);
     private ECSNode[] node;
     public int size;
 
     ECSEntityList(ECSWorld world) {
-        this.world = world;
-
         node = new ECSNode[world.entityCapacity];
         for(ECSEntity e: world) {
             node[e.eid] = new ECSNode(e);
         }
     }
 
-    ECSEntity remove(ECSEntity entity) {
-        size--;
-        return node[entity.eid].remove().entity;
+    void add(ECSEntity entity) {
+        if (!contains(entity)) {
+            size++;
+            node[entity.eid].appendTo(head);
+        }
+    }
+
+    void remove(ECSEntity entity) {
+        if(contains(entity)) {
+            size--;
+            node[entity.eid].remove();
+        }
     }
 
     ECSEntity pop() {
+        if(size == 0) {
+            return null;
+        }
         size--;
         return head.right.remove().entity;
-    }
-
-    ECSEntity push(ECSEntity entity) {
-        size++;
-        return node[entity.eid].appendTo(head).entity;
     }
 
     boolean contains(ECSEntity entity) {

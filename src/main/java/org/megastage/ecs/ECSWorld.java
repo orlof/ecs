@@ -1,14 +1,12 @@
 package org.megastage.ecs;
 
-import com.impetus.annovention.ClasspathDiscoverer;
-import com.impetus.annovention.Discoverer;
-import com.impetus.annovention.listener.ClassAnnotationDiscoveryListener;
 import javassist.*;
 import org.jdom2.Element;
 import org.megastage.ecs.components.Component;
 import org.megastage.ecs.components.ECSComponent;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -23,7 +21,6 @@ public class ECSWorld implements Iterable<ECSEntity> {
     private ECSEntity[] entity;
 
     private ECSEntityList free;
-    private ECSEntityList allocated;
 
     // gameTime management
     private long tickCount = 0;
@@ -41,15 +38,9 @@ public class ECSWorld implements Iterable<ECSEntity> {
         }
 
         free = new ECSEntityList(this);
-        allocated = new ECSEntityList(this);
-
         for(ECSEntity e: entity) {
-            free.push(e);
+            free.add(e);
         }
-    }
-
-    public void set(ECSComponent comp) {
-        entity[comp.eid].component[comp.cid()] = comp;
     }
 
     public void initialize() {
@@ -58,25 +49,13 @@ public class ECSWorld implements Iterable<ECSEntity> {
         }
     }
 
-    public void add(ECSSystem system) {
+    public void addSystem(ECSSystem system) {
         systems.add(system);
     }
 
-    public void add(Element elem) {
+    public void addEntityTemplate(Element elem) {
         if(elem.getName().equals("template")) {
             templates.put(elem.getAttributeValue("name"), elem);
-        }
-    }
-
-    public void spawn(String templateName) {
-        Element templateElement = templates.get(templateName);
-
-        for(Element entityElement: templateElement.getChildren("entity")) {
-            ECSEntity entity = allocate();
-
-            for (Element componentElement : entityElement.getChildren("component")) {
-                entity.addComponent(componentElement);
-            }
         }
     }
 
@@ -85,6 +64,37 @@ public class ECSWorld implements Iterable<ECSEntity> {
         groups.add(group);
 
         return group;
+    }
+
+    public ECSEntity allocateEntity() {
+        ECSEntity entity = free.pop();
+        entity.allocated = true;
+        return entity;
+    }
+
+    public void freeEntity(ECSEntity e) {
+        e.allocated = false;
+        Arrays.fill(e.component, null);
+        free.add(e);
+    }
+
+
+
+
+    public void set(ECSComponent comp) {
+        entity[comp.eid].component[comp.cid()] = comp;
+    }
+
+    public void spawn(String templateName) {
+        Element templateElement = templates.get(templateName);
+
+        for(Element entityElement: templateElement.getChildren("entity")) {
+            ECSEntity entity = allocateEntity();
+
+            for (Element componentElement : entityElement.getChildren("component")) {
+                entity.addComponent(componentElement);
+            }
+        }
     }
 
     public void tick(long wallTime) {
@@ -105,18 +115,6 @@ public class ECSWorld implements Iterable<ECSEntity> {
         }
 
         tickCount++;
-    }
-
-    public ECSEntity allocate() {
-        ECSEntity entity = free.pop();
-        entity.allocated = true;
-        return allocated.push(entity);
-    }
-
-    public ECSEntity free(ECSEntity e) {
-        ECSEntity entity = allocated.pop();
-        entity.allocated = false;
-        return free.push(entity);
     }
 
     private int initComponents() {

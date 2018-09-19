@@ -24,17 +24,15 @@ public abstract class ECSComponent {
     /** This method is called when initial state component is created from template **/
     public void config(Element elem) {}
 
-    public String toString() {
-        return ECSUtil.toString(this);
-    }
-
-
     /** This method is called after world is ready **/
     public void initialize() {
         if(getClass().getAnnotation(Component.class).replicated()) {
             replicated = true;
         }
     }
+
+    /** This method is called when entity is deleted **/
+    public void delete(int eid) {}
 
     public ECSComponent replicate() {
         if(replicated && dirty) {
@@ -48,11 +46,7 @@ public abstract class ECSComponent {
         world.set(this);
     }
 
-
-
-    /** This method is called when entity is deleted **/
-    public void delete(int eid) {}
-
-
-
+    public String toString() {
+        return ECSUtil.toString(this);
+    }
 }

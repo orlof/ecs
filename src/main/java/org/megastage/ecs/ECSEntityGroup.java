@@ -33,18 +33,9 @@ public class ECSEntityGroup implements Iterable<ECSEntity> {
         }
     }
 
-    @Override
-    public Iterator<ECSEntity> iterator() {
-        return entityList.iterator();
-    }
-
-    public Iterator<ECSEntity> pairinator() {
-        return entityList.pairinator();
-    }
-
     private void add(ECSEntity entity) {
         if (!contains(entity)) {
-            entityList.push(entity);
+            entityList.add(entity);
         }
     }
 
@@ -65,6 +56,15 @@ public class ECSEntityGroup implements Iterable<ECSEntity> {
             }
         }
         return true;
+    }
+
+    @Override
+    public Iterator<ECSEntity> iterator() {
+        return entityList.iterator();
+    }
+
+    public Iterator<ECSEntity> pairinator() {
+        return entityList.pairinator();
     }
 }
 
