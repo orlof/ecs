@@ -1,15 +1,13 @@
 package org.megastage.ecs;
 
 import javassist.*;
+import org.jdom2.Attribute;
 import org.jdom2.Element;
 import org.megastage.ecs.components.Component;
 import org.megastage.ecs.components.ECSComponent;
 import org.megastage.ecs.components.ECSMessageComponent;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.*;
 
 public class ECSWorld implements Iterable<ECSEntity> {
     final int entityCapacity;
@@ -55,9 +53,7 @@ public class ECSWorld implements Iterable<ECSEntity> {
     }
 
     public void addEntityTemplate(Element elem) {
-        if(elem.getName().equals("template")) {
-            templates.put(elem.getAttributeValue("name"), elem);
-        }
+        templates.put(elem.getAttributeValue("name"), elem);
     }
 
     public ECSEntityGroup createGroup(int ...components) {
@@ -79,21 +75,31 @@ public class ECSWorld implements Iterable<ECSEntity> {
         free.add(e);
     }
 
-
-
-
     public void set(ECSMessageComponent comp) {
         entity[comp.eid].component[comp.cid()] = comp;
     }
 
-    public void spawn(String templateName) {
-        Element templateElement = templates.get(templateName);
+    public void spawn(String template, Map<String, String> params) {
+        spawn(template, params, new HashMap<>());
+    }
 
-        for(Element entityElement: templateElement.getChildren("entity")) {
-            ECSEntity entity = allocateEntity();
+    private void spawn(String templateName, Map<String, String> params, Map<String, ECSEntity> entityMap) {
+        Element root = templates.get(templateName);
 
-            for (Element componentElement : entityElement.getChildren("component")) {
-                entity.addComponent(componentElement);
+        for(Element elem: root.getChildren()) {
+            if(elem.getName().equals("entity")) {
+                ECSEntity e = allocateEntity();
+                entityMap.put(elem.getAttributeValue("name"), e);
+                for(Element cElem: elem.getChildren()) {
+                    e.addComponent(cElem, params, entityMap);
+                }
+            } else if(elem.getName().equals("instance")) {
+                String template = elem.getAttributeValue("template");
+                HashMap<String, String> subParams = new HashMap<>();
+                for(Attribute attr: elem.getAttributes()) {
+                    subParams.put(attr.getName(), attr.getValue());
+                }
+                spawn(template, subParams);
             }
         }
     }

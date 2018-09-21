@@ -48,9 +48,12 @@ public class Main {
     void serve() throws JDOMException, IOException {
         world = new ECSWorld(1000);
 
-        world.addSystem(new DcpuSystem(world, 0, CompDCPU.cid));
+        world.addSystem(new DcpuSystem(world, 0));
 
         Element root = readConfig(configFilename);
+        for(Element template: root.getChildren("template")) {
+            world.addEntityTemplate(template);
+        }
 
         if(!loadSavedWorld()) {
             initializeNewWorld(root);

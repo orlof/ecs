@@ -5,6 +5,7 @@ import com.impetus.annovention.ClasspathDiscoverer;
 import com.impetus.annovention.Discoverer;
 import com.impetus.annovention.listener.ClassAnnotationDiscoveryListener;
 import org.megastage.ecs.components.Component;
+import org.megastage.ecs.components.KryoMessage;
 import org.megastage.ecs.messages.ECSMessage;
 import org.reflections.Reflections;
 
@@ -100,11 +101,30 @@ public class ECSUtil {
     }
 
     public static void registerKryoClasses(Kryo kryo) {
-        Reflections reflections = new Reflections("my.package");
+        try {
+            for(String classname: ECSUtil.annotated(KryoMessage.class)) {
+                Class clazz = Class.forName(classname);
+                kryo.register(clazz);
+            }
 
-        Set<Class<? extends ECSMessage>> msgs = reflections.getSubTypesOf(ECSMessage.class);
-        for(Class<? extends ECSMessage> clazz: msgs) {
-            kryo.register(clazz);
+            kryo.register(char[].class);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new ECSException(e);
         }
     }
+
+    static final String HEXES = "0123456789ABCDEF";
+    public static String hexlify( char[] raw ) {
+        final StringBuilder hex = new StringBuilder( 4 * raw.length + 1);
+        for (char c : raw ) {
+            hex.append(HEXES.charAt((c & 0xF000) >> 12));
+            hex.append(HEXES.charAt((c & 0x0F00) >> 8));
+            hex.append(HEXES.charAt((c & 0x00F0) >> 4));
+            hex.append(HEXES.charAt((c & 0x000F)));
+            hex.append(" ");
+        }
+        return hex.toString();
+    }
+
 }

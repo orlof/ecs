@@ -1,11 +1,12 @@
 package org.megastage.server;
 
 import org.jdom2.Element;
+import org.megastage.ecs.ECSEntity;
 import org.megastage.ecs.components.Component;
 import org.megastage.ecs.components.ECSComponent;
-import org.megastage.ecs.components.ECSMessageComponent;
 
 import java.util.Arrays;
+import java.util.Map;
 
 @Component
 public class CompDCPU implements ECSComponent {
@@ -37,7 +38,7 @@ public class CompDCPU implements ECSComponent {
     public int ip;
     public int iwp;
 
-    public void config(int eid, Element config) {
+    public void config(int eid, Element config, Map<String, String> params, Map<String, ECSEntity> entityMap) {
         rom = config.getAttributeValue("bootrom");
     }
 

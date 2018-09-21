@@ -4,6 +4,8 @@ import com.esotericsoftware.minlog.Log;
 import org.jdom2.Element;
 import org.megastage.ecs.components.ECSComponent;
 
+import java.util.Map;
+
 public class ECSEntity {
     public int eid;
     public ECSComponent[] component;
@@ -15,12 +17,19 @@ public class ECSEntity {
         component = new ECSComponent[capacity];
     }
 
-    public ECSComponent addComponent(Element element) {
+    public ECSComponent addComponent(Element element, Map<String, String> params, Map<String, ECSEntity> entityMap) {
         try {
-            Class clazz = Class.forName(element.getAttributeValue("type"));
+            String name = element.getName();
+            if(name.startsWith("ECS")) {
+                name = String.format("org.megastage.ecs.components.%s", name);
+            } else {
+                name = String.format("org.megastage.components.%s", name);
+            }
+
+            Class clazz = Class.forName(name);
             ECSComponent c = (ECSComponent) clazz.newInstance();
 
-            c.config(eid, element);
+            c.config(eid, element, params, entityMap);
 
             component[c.cid()] = c;
 

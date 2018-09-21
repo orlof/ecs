@@ -1,7 +1,10 @@
 package org.megastage.server;
 
-import java.util.Arrays;
+import org.megastage.ecs.components.KryoMessage;
 
+import static org.megastage.ecs.ECSUtil.hexlify;
+
+@KryoMessage
 public class RAMArea {
     public char[] mem;
 
@@ -16,40 +19,25 @@ public class RAMArea {
     }
 
     public boolean update(char[] mem) {
-        return update(mem, (char) 0, mem.length);
+        return update(mem, 0, mem.length);
     }
 
-    public boolean update(char[] memory, char start, int size) {
-        if(equals(memory, start, size)) return false;
-
-        this.mem = Arrays.copyOfRange(memory, start, start + size);
-        return true;
-    }
-
-    public boolean equals(char[] memory, char start, int size) {
-        if(size != mem.length) return false;
+    public boolean update(char[] memory, int start, int size) {
+        boolean dirty = false;
 
         for(int i=0; i < size; i++) {
-            if(mem[i] != memory[i + start]) return false;
+            char c = memory[(start + i) & 0xffff];
+            if(c != mem[i]) {
+                dirty = true;
+                mem[i] = c;
+            }
         }
 
-        return true;
+        return dirty;
     }
 
     public String toString() {
-        return getHex(mem);
+        return hexlify(mem);
     }
 
-    static final String HEXES = "0123456789ABCDEF";
-    public static String getHex( char[] raw ) {
-        final StringBuilder hex = new StringBuilder( 4 * raw.length + 1);
-        for (char c : raw ) {
-            hex.append(HEXES.charAt((c & 0xF000) >> 12));
-            hex.append(HEXES.charAt((c & 0x0F00) >> 8));
-            hex.append(HEXES.charAt((c & 0x00F0) >> 4));
-            hex.append(HEXES.charAt((c & 0x000F)));
-            hex.append(" ");
-        }
-        return hex.toString();
-    }
 }

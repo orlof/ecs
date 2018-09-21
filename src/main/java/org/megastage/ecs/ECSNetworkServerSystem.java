@@ -4,10 +4,10 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 import com.esotericsoftware.minlog.Log;
-import com.google.common.graph.Network;
 import org.megastage.ecs.components.ECSFlagDeleted;
 import org.megastage.ecs.components.ECSFlagReplicate;
 import org.megastage.ecs.components.ECSFlagPlayer;
+import org.megastage.ecs.messages.ECSMessage;
 import org.megastage.ecs.messages.ECSMessageLogin;
 
 import java.io.IOException;
@@ -32,13 +32,19 @@ public class ECSNetworkServerSystem extends ECSSystem {
         server = new Server(64*1024, 64*1024) {
             @Override
             protected Connection newConnection () {
-                return new ECSNetworkConnection();
+                return new ECSConnection();
             }
         };
 
         ECSUtil.registerKryoClasses(server.getKryo());
 
-        server.addListener(new NetworkListener());
+        server.addListener(new Listener() {
+            @Override
+            public void received(Connection connection, Object message) {
+                ECSNetworkServerSystem.this.received((ECSConnection) connection, (ECSMessage) message);
+            }
+        });
+
         new Thread(server).start();
 
         try {
@@ -49,8 +55,24 @@ public class ECSNetworkServerSystem extends ECSSystem {
         }
     }
 
+    private void received(ECSConnection connection, ECSMessage message) {
+        if(message instanceof ECSMessageLogin) {
+            connection.nick = ((ECSMessageLogin) message).nick;
+            connection.state = ECSConnection.State.WaitingForInitialData;
+        }
+
+        /*
+        else if(o instanceof Network.Logout) {
+            handleLogoutMessage(pc, (Network.Logout) o);
+
+        } else if(o instanceof UserCommand) {
+            handleUserCmd(pc, (UserCommand) o);
+        }
+        */
+    }
+
     @Override
-    protected void process() {
+    protected void processSystem() {
         Connection[] connections = server.getConnections();
         processNewConnections(connections);
 
@@ -393,26 +415,5 @@ public class ECSNetworkServerSystem extends ECSSystem {
     private void cmdText(PlayerConnection connection, String cmdText) {
         Log.info(cmdText);
         World.INSTANCE.setComponent(connection.player, CompType.CmdText, CmdText.create(cmdText));
-    }
-
-    private class NetworkListener extends Listener {
-        @Override
-        public void received(Connection connection, Object message) {
-            try {
-                ECSNetworkConnection clientConnection = (ECSNetworkConnection) connection;
-
-                if(message instanceof ECSMessageLogin) {
-                    clientConnection.nick = ((ECSMessageLogin) message).nick;
-
-                } else if(o instanceof Network.Logout) {
-                    handleLogoutMessage(pc, (Network.Logout) o);
-
-                } else if(o instanceof UserCommand) {
-                    handleUserCmd(pc, (UserCommand) o);
-                }
-            } catch(Exception ex) {
-                ex.printStackTrace();
-            }
-        }
     }
 }

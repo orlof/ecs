@@ -1,7 +1,14 @@
 package org.megastage.server;
 
 public class CompDCPUHardwareLEM extends CompDCPUHardware {
-    public MessageLEM data;
+    public char videoAddr = 0x8000;
+    public RAMArea video = new RAMArea(LEMUtil.defaultVideo);
+
+    public char fontAddr = 0x0000;
+    public RAMArea font = new RAMArea(LEMUtil.defaultFont);
+
+    public char paletteAddr = 0x0000;
+    public RAMArea palette = new RAMArea(LEMUtil.defaultPalette);
 
     public CompDCPUHardwareLEM() {
         super(DCPUManufactorer.NYA_ELEKTRISKA, DCPUHardwareType.LEM, 0x1802);
@@ -14,13 +21,13 @@ public class CompDCPUHardwareLEM extends CompDCPUHardware {
 
         switch(a) {
             case 0:
-                data.videoAddr = b;
+                videoAddr = b;
                 break;
             case 1:
-                data.fontAddr = b;
+                fontAddr = b;
                 break;
             case 2:
-                data.paletteAddr = b;
+                paletteAddr = b;
                 break;
             case 3:
                 // borderColor = (dcpu.registers[1] & 0xF);
@@ -48,24 +55,19 @@ public class CompDCPUHardwareLEM extends CompDCPUHardware {
     public void tick60hz(CompDCPU dcpu) {
     }
 
-    public boolean isDirty() {
-        CompDCPU dcpu = (CompDCPU) World.INSTANCE.getComponent(dcpuEID, CompType.DCPU);
-        if(dcpu == null) {
-            // only happens while waiting CleanupSystem
-            return false;
-        }
+    public boolean isDirty(CompDCPU dcpu) {
+        boolean dirty = videoAddr == 0 ?
+                video.update(LEMUtil.defaultVideo):
+                video.update(dcpu.ram, videoAddr, 384);
 
-        dirty |= data.videoAddr == 0 ?
-                data.video.update(LEMUtil.defaultVideo):
-                data.video.update(dcpu.ram, data.videoAddr, 384);
+        dirty |= fontAddr == 0 ?
+                font.update(LEMUtil.defaultFont):
+                font.update(dcpu.ram, fontAddr, 256);
 
-        dirty |= data.fontAddr == 0 ?
-                data.font.update(LEMUtil.defaultFont):
-                data.font.update(dcpu.ram, data.fontAddr, 256);
-
-        dirty |= data.paletteAddr == 0 ?
-                data.palette.update(LEMUtil.defaultPalette):
-                data.palette.update(dcpu.ram, data.paletteAddr, 16);
+        dirty |= paletteAddr == 0 ?
+                palette.update(LEMUtil.defaultPalette):
+                palette.update(dcpu.ram, paletteAddr, 16);
 
         return dirty;
-    }}
+    }
+}
