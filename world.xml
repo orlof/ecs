@@ -1,0 +1,47 @@
+<world>
+    <template name="ship">
+        <entity name="ship">
+            <ShipGeometry>
+                <x y="0" z="00">################</x>
+                <x y="0" z="01">################</x>
+                <x y="0" z="02">################</x>
+                <x y="0" z="03">################</x>
+                <x y="0" z="04">################</x>
+                <x y="0" z="05">################</x>
+                <x y="0" z="06">################</x>
+                <x y="0" z="07">################</x>
+                <x y="0" z="08">################</x>
+                <x y="0" z="09">################</x>
+                <x y="0" z="10">################</x>
+                <x y="0" z="11">################</x>
+                <x y="0" z="12">################</x>
+                <x y="0" z="13">################</x>
+                <x y="0" z="14">################</x>
+                <x y="0" z="15">################</x>
+            </ShipGeometry>
+            <ECSPosition x="X" y="Y" z="Z"/>
+            <ECSRotation x="ROTX" y="ROTY" z="ROTZ"/>
+            <ECSFlagCanPick/>
+            <ECSFlagReplicate/>
+        </entity>
+        <instance name="DCPU" X="5.5" Y="1.5" Z="0.5" ROTX="0" ROTY="0" ROTZ="0" BIND_TO="ship">
+    </instance>
+
+    <template name="DCPU">
+        <entity name="DCPU">
+            <DCPU bootrom="media/bootrom.bin"/>
+        </entity>
+        <entity name="LEM">
+            <DCPUHardwareLEM connected_to="DCPU"/>
+            <MonitorGeometry width="3" height="2"/>
+            <ECSPosition x="X" y="Y" z="Z"/>
+            <ECSRotation x="ROTX" y="ROTY" z="ROTZ"/>
+            <ECSFlagCanPick/>
+            <ECSFlagReplicate/>
+            <ECSBoundTo master="BIND_TO"/>
+        </entity>
+    </template>
+
+    <instance template="ship" X="0" Y="0" Z="10100" ROTX="0" ROTY="0" ROTZ="0"/>
+    <instance template="ship" X="0" Y="10" Z="10100" ROTX="0" ROTY="0" ROTZ="0"/>
+</world>
