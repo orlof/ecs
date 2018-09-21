@@ -5,10 +5,8 @@ import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 import com.esotericsoftware.minlog.Log;
 import com.google.common.graph.Network;
-import javassist.*;
-import org.megastage.ecs.components.Component;
 import org.megastage.ecs.components.ECSFlagDeleted;
-import org.megastage.ecs.components.ECSFlagDistributed;
+import org.megastage.ecs.components.ECSFlagReplicate;
 import org.megastage.ecs.components.ECSFlagPlayer;
 import org.megastage.ecs.messages.ECSMessageLogin;
 
@@ -24,7 +22,7 @@ public class ECSNetworkServerSystem extends ECSSystem {
     public ECSNetworkServerSystem(ECSWorld world, long interval) {
         super(world, interval);
 
-        replicate = world.createGroup(ECSFlagDistributed.cid);
+        replicate = world.createGroup(ECSFlagReplicate.cid);
         delete = world.createGroup(ECSFlagDeleted.cid);
         player = world.createGroup(ECSFlagPlayer.cid);
     }

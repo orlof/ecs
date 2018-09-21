@@ -4,5 +4,5 @@ import org.megastage.ecs.Message;
 
 @Message
 @Component(replicated = true)
-public class ECSFlagPlayer extends ECSComponent {
+public class ECSFlagPlayer extends ECSMessageComponent {
 }

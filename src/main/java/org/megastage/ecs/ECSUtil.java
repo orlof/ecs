@@ -5,6 +5,8 @@ import com.impetus.annovention.ClasspathDiscoverer;
 import com.impetus.annovention.Discoverer;
 import com.impetus.annovention.listener.ClassAnnotationDiscoveryListener;
 import org.megastage.ecs.components.Component;
+import org.megastage.ecs.messages.ECSMessage;
+import org.reflections.Reflections;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -98,14 +100,11 @@ public class ECSUtil {
     }
 
     public static void registerKryoClasses(Kryo kryo) {
-        try {
-            for(String classname: ECSUtil.annotated(Message.class)) {
-                Class clazz = Class.forName(classname);
-                kryo.register(clazz);
-            }
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            throw new ECSException(e);
+        Reflections reflections = new Reflections("my.package");
+
+        Set<Class<? extends ECSMessage>> msgs = reflections.getSubTypesOf(ECSMessage.class);
+        for(Class<? extends ECSMessage> clazz: msgs) {
+            kryo.register(clazz);
         }
     }
 }

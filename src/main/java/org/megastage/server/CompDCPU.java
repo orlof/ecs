@@ -1,19 +1,17 @@
 package org.megastage.server;
 
 import org.jdom2.Element;
-import org.megastage.ecs.ECSWorld;
 import org.megastage.ecs.components.Component;
 import org.megastage.ecs.components.ECSComponent;
+import org.megastage.ecs.components.ECSMessageComponent;
 
-import java.io.IOException;
 import java.util.Arrays;
 
 @Component
-public class ComponentDcpu extends ECSComponent {
-    private int hz = 100000;
-    private int hardwareTickInterval = hz / 60;
+public class CompDCPU implements ECSComponent {
+    public int hz = 100000;
+    public int hardwareTickInterval = hz / 60;
 
-    public boolean powerOn;
     public String rom;
 
     public int[] hardware = new int[100];
@@ -27,8 +25,8 @@ public class ComponentDcpu extends ECSComponent {
     public char ex;
     public char ia;
 
-    public long powerOnTime;
-    public long startupTime;
+    public long powerTime;
+    public long startTime;
     public long nextHardwareTick;
     public long ticks;
 
@@ -39,7 +37,7 @@ public class ComponentDcpu extends ECSComponent {
     public int ip;
     public int iwp;
 
-    public void config(Element config) {
+    public void config(int eid, Element config) {
         rom = config.getAttributeValue("bootrom");
     }
 
@@ -57,8 +55,8 @@ public class ComponentDcpu extends ECSComponent {
     public void powerOn(char[] romData, long cTime) {
         System.arraycopy(romData, 0, ram, 0, romData.length);
 
-        powerOnTime = cTime + 2500;
-        startupTime = powerOnTime + 2500;
+        powerTime = cTime + 2500;
+        startTime = powerTime + 2500;
 
         Arrays.fill(registers, (char) 0);
         Arrays.fill(interrupts, (char) 0);
@@ -70,13 +68,18 @@ public class ComponentDcpu extends ECSComponent {
         nextHardwareTick = hardwareTickInterval;
     }
 
+    public void powerOff(char[] romData, long cTime) {
+        powerTime = -1;
+        startTime = -1;
+    }
+
     public void addHardware(int eid) {
         hardware[hardwareSize++] = eid;
     }
 
-    public DCPUHardware getHardware(char b) {
+    public CompDCPUHardware getHardware(char b) {
         if (b < hardwareSize) {
-            return (DCPUHardware) World.INSTANCE.getComponent(hardware[b], CompType.DCPUHardware);
+            return (CompDCPUHardware) World.INSTANCE.getComponent(hardware[b], CompType.DCPUHardware);
         }
         return null;
     }

@@ -1,8 +1,5 @@
 package org.megastage.ecs.components;
 
-import org.megastage.ecs.Message;
-
-@Message
-@Component(replicated = true)
-public class ECSFlagDeleted extends ECSComponent {
+@Component
+public class ECSFlagDeleted extends ECSMessageComponent {
 }

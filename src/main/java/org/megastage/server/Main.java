@@ -48,7 +48,7 @@ public class Main {
     void serve() throws JDOMException, IOException {
         world = new ECSWorld(1000);
 
-        world.addSystem(new DcpuSystem(world, 0, ComponentDcpu.cid));
+        world.addSystem(new DcpuSystem(world, 0, CompDCPU.cid));
 
         Element root = readConfig(configFilename);
 

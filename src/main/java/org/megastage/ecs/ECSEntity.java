@@ -19,9 +19,8 @@ public class ECSEntity {
         try {
             Class clazz = Class.forName(element.getAttributeValue("type"));
             ECSComponent c = (ECSComponent) clazz.newInstance();
-            c.eid = eid;
 
-            c.config(element);
+            c.config(eid, element);
 
             component[c.cid()] = c;
 

@@ -4,6 +4,7 @@ import javassist.*;
 import org.jdom2.Element;
 import org.megastage.ecs.components.Component;
 import org.megastage.ecs.components.ECSComponent;
+import org.megastage.ecs.components.ECSMessageComponent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,7 +19,7 @@ public class ECSWorld implements Iterable<ECSEntity> {
     private ArrayList<ECSEntityGroup> groups = new ArrayList<>(100);
     private HashMap<String, Element> templates = new HashMap<>();
 
-    private ECSEntity[] entity;
+    public ECSEntity[] entity;
 
     private ECSEntityList free;
 
@@ -81,7 +82,7 @@ public class ECSWorld implements Iterable<ECSEntity> {
 
 
 
-    public void set(ECSComponent comp) {
+    public void set(ECSMessageComponent comp) {
         entity[comp.eid].component[comp.cid()] = comp;
     }
 
@@ -124,7 +125,8 @@ public class ECSWorld implements Iterable<ECSEntity> {
             int index = 0;
             for(String classname: ECSUtil.annotated(Component.class)) {
                 CtClass ctClass = cp.get(classname);
-                ctClass.addField(CtField.make("public static int cid = " + (index++) + ";", ctClass));
+                ctClass.addField(CtField.make(String.format("public static int cid = %d;", index++), ctClass));
+                ctClass.addMethod(CtNewMethod.make(String.format("public int cid() { return %d; }", index++), ctClass));
                 ctClass.toClass();
             }
 
@@ -138,6 +140,14 @@ public class ECSWorld implements Iterable<ECSEntity> {
     @Override
     public Iterator<ECSEntity> iterator() {
         return new ECSEntityIterator();
+    }
+
+    public ECSComponent getComponent(int eid, int cid) {
+        return entity[eid].component[cid];
+    }
+
+    public void setComponent(int eid, ECSComponent comp) {
+        entity[eid].component[comp.cid()] = comp;
     }
 
     private class ECSEntityIterator implements Iterator<ECSEntity> {
