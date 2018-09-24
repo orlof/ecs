@@ -1,23 +1,21 @@
 package org.megastage.ecs;
 
-import com.esotericsoftware.kryonet.Connection;
-import com.esotericsoftware.kryonet.Listener;
-import com.esotericsoftware.kryonet.Server;
-import com.esotericsoftware.minlog.Log;
-import org.megastage.ecs.components.ECSFlagDeleted;
-import org.megastage.ecs.components.ECSFlagReplicate;
-import org.megastage.ecs.components.ECSFlagPlayer;
-import org.megastage.ecs.messages.ECSMessage;
-import org.megastage.ecs.messages.ECSMessageLogin;
+import com.esotericsoftware.kryonet.adapters.Listener;
+import com.esotericsoftware.kryonet.network.ClientConnection;
+import com.esotericsoftware.kryonet.network.impl.Server;
+import org.megastage.ecs.components.*;
+import org.megastage.ecs.messages.ECSMessageToServer;
 
 import java.io.IOException;
 
-public class ECSNetworkServerSystem extends ECSSystem {
+public class ECSNetworkServerSystem extends ECSSystem implements Listener<ClientConnection> {
     private Server server;
 
     private ECSEntityGroup replicate;
     private ECSEntityGroup delete;
     private ECSEntityGroup player;
+
+    private boolean fullReplication;
 
     public ECSNetworkServerSystem(ECSWorld world, long interval) {
         super(world, interval);
@@ -29,21 +27,13 @@ public class ECSNetworkServerSystem extends ECSSystem {
 
     @Override
     public void initialize() {
-        server = new Server(64*1024, 64*1024) {
+        server = new Server(64 * 1024, 64 * 1024) {
             @Override
-            protected Connection newConnection () {
-                return new ECSConnection();
+            protected ClientConnection newConnection() {
+                return new ECSConnectionToClient();
             }
         };
-
-        ECSUtil.registerKryoClasses(server.getKryo());
-
-        server.addListener(new Listener() {
-            @Override
-            public void received(Connection connection, Object message) {
-                ECSNetworkServerSystem.this.received((ECSConnection) connection, (ECSMessage) message);
-            }
-        });
+        server.addListener(this);
 
         new Thread(server).start();
 
@@ -55,42 +45,58 @@ public class ECSNetworkServerSystem extends ECSSystem {
         }
     }
 
-    private void received(ECSConnection connection, ECSMessage message) {
-        if(message instanceof ECSMessageLogin) {
-            connection.nick = ((ECSMessageLogin) message).nick;
-            connection.state = ECSConnection.State.WaitingForInitialData;
-        }
-
-        /*
-        else if(o instanceof Network.Logout) {
-            handleLogoutMessage(pc, (Network.Logout) o);
-
-        } else if(o instanceof UserCommand) {
-            handleUserCmd(pc, (UserCommand) o);
-        }
-        */
-    }
-
     @Override
     protected void processSystem() {
-        Connection[] connections = server.getConnections();
-        processNewConnections(connections);
+        boolean fullReplication;
 
-        Bag<Message> update = new Bag<>(100);
-        update.add(new TimestampMessage());
+        synchronized (this) {
+            fullReplication = this.fullReplication;
+            this.fullReplication = false;
+        }
 
-        processDeletedEntities(update);
-        processSynchronizedEntities(update);
+        // process incoming messages
+        for(ClientConnection cc: server.getConnections()) {
+            ECSConnectionToClient ecc = (ECSConnectionToClient) cc;
+            ecc.receivedMessage.receive(world, ecc);
+        }
 
-        if(update.size() > 1) {
-            Message[] data = update.toArray(Message.class);
-
-            for(Connection c: connections) {
-                //Log.info("sending %d messages", data.length);
-                c.sendUDP(data);
+        for(ECSEntity e: replicate) {
+            for(ECSComponent c: e) {
+                if(c instanceof ECSReplicatedComponent) {
+                    ECSReplicatedComponent rc = (ECSReplicatedComponent) c;
+                    if(fullReplication || rc.isDirty()) {
+                        server.sendToAll(rc.transmit());
+                    }
+                }
             }
         }
     }
+
+
+    @Override
+    public void onConnected(ClientConnection conn) {
+        synchronized(this) {
+            fullReplication = true;
+        }
+    }
+
+    @Override
+    public void onDisconnected(ClientConnection conn) {
+    }
+
+    @Override
+    public void onIdle(ClientConnection conn) {
+    }
+
+    @Override
+    public void received(ClientConnection conn, Object o) {
+        ECSConnectionToClient c = (ECSConnectionToClient) conn;
+        ECSMessageToServer msg = (ECSMessageToServer) o;
+
+        c.receivedMessage = msg;
+    }
+}
+/*
 
     private void initConnection(PlayerConnection connection) {
         int eid = 0;
@@ -417,3 +423,5 @@ public class ECSNetworkServerSystem extends ECSSystem {
         World.INSTANCE.setComponent(connection.player, CompType.CmdText, CmdText.create(cmdText));
     }
 }
+
+*/

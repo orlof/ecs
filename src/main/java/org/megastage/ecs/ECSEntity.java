@@ -4,9 +4,10 @@ import com.esotericsoftware.minlog.Log;
 import org.jdom2.Element;
 import org.megastage.ecs.components.ECSComponent;
 
+import java.util.Iterator;
 import java.util.Map;
 
-public class ECSEntity {
+public class ECSEntity implements Iterable<ECSComponent> {
     public int eid;
     public ECSComponent[] component;
 
@@ -43,5 +44,34 @@ public class ECSEntity {
 
     public boolean contains(int cid) {
         return component[cid] != null;
+    }
+
+    @Override
+    public Iterator<ECSComponent> iterator() {
+        return new ECSComponentIterator();
+    }
+
+    private class ECSComponentIterator implements Iterator<ECSComponent> {
+        private int nextPosition = 0;
+
+        ECSComponentIterator() {
+            advance();
+        }
+
+        private void advance() {
+            while(component[nextPosition] == null && nextPosition < component.length) {
+                nextPosition++;
+            }
+        }
+
+        public boolean hasNext() {
+            return nextPosition < component.length;
+        }
+
+        public ECSComponent next() {
+            int result = nextPosition;
+            advance();
+            return component[result];
+        }
     }
 }

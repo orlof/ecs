@@ -2,7 +2,6 @@ package org.megastage.ecs.components;
 
 import org.jdom2.Element;
 import org.megastage.ecs.ECSEntity;
-import org.megastage.ecs.messages.ECSMessage;
 
 import java.util.Map;
 
@@ -19,6 +18,4 @@ public interface ECSComponent {
 
     /** This method is called when entity is deleted **/
     default void delete(int eid) {}
-
-    default ECSMessage transmit() { return null; }
 }

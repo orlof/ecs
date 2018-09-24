@@ -1,18 +1,16 @@
 package org.megastage.ecs;
 
-import com.esotericsoftware.kryo.Kryo;
 import com.impetus.annovention.ClasspathDiscoverer;
 import com.impetus.annovention.Discoverer;
 import com.impetus.annovention.listener.ClassAnnotationDiscoveryListener;
-import org.megastage.ecs.components.Component;
 import org.megastage.ecs.components.KryoMessage;
-import org.megastage.ecs.messages.ECSMessage;
-import org.reflections.Reflections;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class ECSUtil {
     private static transient HashMap<Class, Field[]> _cache = new HashMap<>();
@@ -100,6 +98,7 @@ public class ECSUtil {
         return result;
     }
 
+/*
     public static void registerKryoClasses(Kryo kryo) {
         try {
             for(String classname: ECSUtil.annotated(KryoMessage.class)) {
@@ -113,7 +112,7 @@ public class ECSUtil {
             throw new ECSException(e);
         }
     }
-
+*/
     static final String HEXES = "0123456789ABCDEF";
     public static String hexlify( char[] raw ) {
         final StringBuilder hex = new StringBuilder( 4 * raw.length + 1);

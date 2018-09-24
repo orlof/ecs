@@ -18,6 +18,13 @@
         <javaassist.version>3.21.0-GA</javaassist.version>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>local-maven-repo</id>
+            <url>file:///${project.basedir}/local-maven-repo</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.jdom/jdom2 -->
         <dependency>
@@ -48,10 +55,15 @@
             <version>1.7</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.esotericsoftware/kryonet -->
-        <dependency>
+        <!--dependency>
             <groupId>com.esotericsoftware</groupId>
             <artifactId>kryonet</artifactId>
             <version>2.22.0-RC1</version>
+        </dependency-->
+        <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>kryoms</artifactId>
+            <version>1.0b</version>
         </dependency>
         <dependency>
             <groupId>com.beust</groupId>

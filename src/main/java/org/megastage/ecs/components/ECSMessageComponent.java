@@ -4,18 +4,18 @@ import org.jdom2.Element;
 import org.megastage.ecs.ECSEntity;
 import org.megastage.ecs.ECSUtil;
 import org.megastage.ecs.ECSWorld;
-import org.megastage.ecs.messages.ECSMessage;
+import org.megastage.ecs.messages.ECSMessageToServer;
 
 import java.util.Map;
 
-public abstract class ECSMessageComponent implements ECSMessage, ECSComponent {
+public abstract class ECSMessageComponent implements ECSMessageToServer, ECSComponent {
     public int eid;
 
     public void config(int eid, Element config, Map<String, String> params, Map<String, ECSEntity> entityMap) {
         this.eid = eid;
     }
 
-    public ECSMessage transmit() {
+    public ECSMessageToServer transmit() {
         return this;
     }
 

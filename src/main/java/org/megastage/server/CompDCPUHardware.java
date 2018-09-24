@@ -1,10 +1,10 @@
 package org.megastage.server;
 
 import org.megastage.ecs.components.Component;
-import org.megastage.ecs.components.ECSMessageComponent;
+import org.megastage.ecs.components.ECSComponent;
 
 @Component
-public abstract class CompDCPUHardware extends ECSMessageComponent {
+public abstract class CompDCPUHardware implements ECSComponent {
     public final DCPUManufactorer manufactorer;
     public final DCPUHardwareType type;
     public final int revision;
@@ -14,7 +14,6 @@ public abstract class CompDCPUHardware extends ECSMessageComponent {
         this.type = type;
         this.revision = revision;
     }
-
 
     public void query(CompDCPU dcpu) {
         dcpu.registers[0] = (char) (this.type.low());
