@@ -2,13 +2,13 @@ package org.megastage.server;
 
 import org.jdom2.Element;
 import org.megastage.ecs.ECSEntity;
-import org.megastage.ecs.components.Component;
+import org.megastage.ecs.components.AllocateCid;
 import org.megastage.ecs.components.ECSComponent;
 
 import java.util.Arrays;
 import java.util.Map;
 
-@Component
+@AllocateCid
 public class CompDCPU implements ECSComponent {
     public int hz = 100000;
     public int hardwareTickInterval = hz / 60;

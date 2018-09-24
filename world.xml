@@ -19,12 +19,12 @@
                 <x y="0" z="14">################</x>
                 <x y="0" z="15">################</x>
             </ShipGeometry>
-            <ECSPosition x="X" y="Y" z="Z"/>
-            <ECSRotation x="ROTX" y="ROTY" z="ROTZ"/>
+            <ECSPosition value="POS_VECTOR"/>
+            <ECSRotation value="ROT_VECTOR"/>
             <ECSFlagCanPick/>
             <ECSFlagReplicate/>
         </entity>
-        <instance name="DCPU" X="5.5" Y="1.5" Z="0.5" ROTX="0" ROTY="0" ROTZ="0" BIND_TO="ship">
+        <instance template="DCPU" POS_VECTOR="5.5 1.5 0.5" ROT_VECTOR="0 0 0" BIND_TO="ship">
     </instance>
 
     <template name="DCPU">
@@ -32,16 +32,27 @@
             <DCPU bootrom="media/bootrom.bin"/>
         </entity>
         <entity name="LEM">
-            <DCPUHardwareLEM connected_to="DCPU"/>
+            <DCPUHardwareLEM connectedTo="DCPU"/>
             <MonitorGeometry width="3" height="2"/>
-            <ECSPosition x="X" y="Y" z="Z"/>
-            <ECSRotation x="ROTX" y="ROTY" z="ROTZ"/>
+            <ECSPosition value="POS_VECTOR"/>
+            <ECSRotation value="ROT_VECTOR"/>
             <ECSFlagCanPick/>
             <ECSFlagReplicate/>
-            <ECSBoundTo master="BIND_TO"/>
+            <ECSBindTo master="BIND_TO"/>
         </entity>
     </template>
 
-    <instance template="ship" X="0" Y="0" Z="10100" ROTX="0" ROTY="0" ROTZ="0"/>
-    <instance template="ship" X="0" Y="10" Z="10100" ROTX="0" ROTY="0" ROTZ="0"/>
+    <template name="player">
+        <entity name="player">
+            <ECSPlayer nick="NICK"/>
+            <ECSFlagReplicate/>
+            <CharacterGeometry/>
+            <ECSPosition value="POS_VECTOR"/>
+            <ECSRotation value="ROT_VECTOR"/>
+            <ECSBoundTo master="MASTER"/>
+        </entity>
+    </template>
+
+    <instance template="ship" POS_VECTOR="0 0 10000" ROT_VECTOR="0 0 0" />
+    <instance template="ship" POS_VECTOR="0 0 10100" ROT_VECTOR="0 0 0" />
 </world>

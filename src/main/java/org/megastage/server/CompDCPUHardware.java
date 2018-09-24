@@ -1,9 +1,9 @@
 package org.megastage.server;
 
-import org.megastage.ecs.components.Component;
+import org.megastage.ecs.components.AllocateCid;
 import org.megastage.ecs.components.ECSMessageComponent;
 
-@Component
+@AllocateCid
 public abstract class CompDCPUHardware extends ECSMessageComponent {
     public final DCPUManufactorer manufactorer;
     public final DCPUHardwareType type;

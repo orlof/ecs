@@ -1,5 +1,5 @@
 package org.megastage.ecs.components;
 
-@Component
+@AllocateCid
 public class ECSFlagReplicate implements ECSComponent {
 }

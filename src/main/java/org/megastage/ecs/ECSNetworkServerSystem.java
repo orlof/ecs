@@ -3,14 +3,12 @@ package org.megastage.ecs;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
-import com.esotericsoftware.minlog.Log;
-import org.megastage.ecs.components.ECSFlagDeleted;
-import org.megastage.ecs.components.ECSFlagReplicate;
-import org.megastage.ecs.components.ECSFlagPlayer;
+import org.megastage.ecs.components.*;
 import org.megastage.ecs.messages.ECSMessage;
-import org.megastage.ecs.messages.ECSMessageLogin;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ECSNetworkServerSystem extends ECSSystem {
     private Server server;
@@ -24,14 +22,14 @@ public class ECSNetworkServerSystem extends ECSSystem {
 
         replicate = world.createGroup(ECSFlagReplicate.cid);
         delete = world.createGroup(ECSFlagDeleted.cid);
-        player = world.createGroup(ECSFlagPlayer.cid);
+        player = world.createGroup(ECSPlayer.cid);
     }
 
     @Override
     public void initialize() {
-        server = new Server(64*1024, 64*1024) {
+        server = new Server(64 * 1024, 64 * 1024) {
             @Override
-            protected Connection newConnection () {
+            protected Connection newConnection() {
                 return new ECSConnection();
             }
         };
@@ -41,7 +39,8 @@ public class ECSNetworkServerSystem extends ECSSystem {
         server.addListener(new Listener() {
             @Override
             public void received(Connection connection, Object message) {
-                ECSNetworkServerSystem.this.received((ECSConnection) connection, (ECSMessage) message);
+                ECSConnection conn = (ECSConnection) connection;
+                conn.received = (ECSMessage) message;
             }
         });
 
@@ -55,22 +54,39 @@ public class ECSNetworkServerSystem extends ECSSystem {
         }
     }
 
-    private void received(ECSConnection connection, ECSMessage message) {
-        if(message instanceof ECSMessageLogin) {
-            connection.nick = ((ECSMessageLogin) message).nick;
-            connection.state = ECSConnection.State.WaitingForInitialData;
+    @Override
+    protected void processSystem() {
+        for(Connection conn: server.getConnections()) {
+            ECSConnection ecsConn = (ECSConnection) conn;
+            if(ecsConn.received != null) {
+                ecsConn.received.receive(world, ecsConn);
+                ecsConn.received = null;
+            }
         }
 
-        /*
-        else if(o instanceof Network.Logout) {
-            handleLogoutMessage(pc, (Network.Logout) o);
-
-        } else if(o instanceof UserCommand) {
-            handleUserCmd(pc, (UserCommand) o);
-        }
-        */
+        server.sendToAllUDP(createUpdate());
+        world.dirty = false;
     }
 
+    ECSMessage[] createUpdate() {
+        List<ECSMessage> result = new ArrayList<>(200);
+
+        for(ECSEntity entity: replicate) {
+            for(ECSComponent comp: entity) {
+                if(comp instanceof ECSReplicatedComponent) {
+                    ECSReplicatedComponent rcomp = (ECSReplicatedComponent) comp;
+                    if(world.dirty || rcomp.isDirty()) {
+                        result.add(rcomp.transmit());
+                    }
+                }
+            }
+        }
+
+        return result.toArray(new ECSMessage[result.size()]);
+    }
+
+}
+/*
     @Override
     protected void processSystem() {
         Connection[] connections = server.getConnections();
@@ -132,13 +148,13 @@ public class ECSNetworkServerSystem extends ECSSystem {
 
         // bind player to ship
         BindTo bind = new BindTo();
-        bind.parent = ship;
+        bind.master = ship;
         world.setComponent(eid, CompType.BindTo, bind);
 
         SpawnPoint sp = (SpawnPoint) world.getComponent(ship, CompType.SpawnPoint);
 
         Position pos = (Position) world.getComponent(eid, CompType.Position);
-        pos.set(sp.vector);
+        pos.set(sp.value);
 
         PlayerCharacter pc = (PlayerCharacter) world.getComponent(eid, CompType.PlayerCharacter);
         pc.name = connection.nick;
@@ -341,7 +357,7 @@ public class ECSNetworkServerSystem extends ECSSystem {
         SpawnPoint sp = (SpawnPoint) world.getComponent(teleport.eid, CompType.SpawnPoint);
 
         Position pos = (Position) world.getComponent(connection.player, CompType.Position);
-        pos.set(sp.vector);
+        pos.set(sp.value);
     }
 
     private void processNewConnections(Connection[] connections) {
@@ -417,3 +433,4 @@ public class ECSNetworkServerSystem extends ECSSystem {
         World.INSTANCE.setComponent(connection.player, CompType.CmdText, CmdText.create(cmdText));
     }
 }
+*/

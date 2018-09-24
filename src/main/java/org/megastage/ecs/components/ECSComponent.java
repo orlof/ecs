@@ -1,8 +1,7 @@
 package org.megastage.ecs.components;
 
-import org.jdom2.Element;
 import org.megastage.ecs.ECSEntity;
-import org.megastage.ecs.messages.ECSMessage;
+import org.megastage.ecs.ECSUtil;
 
 import java.util.Map;
 
@@ -12,13 +11,17 @@ public interface ECSComponent {
     default int cid() { return 0; }
 
     /** This method is called when initial state component is created from template **/
-    default void config(int eid, Element elem, Map<String, String> params, Map<String, ECSEntity> entityMap) {}
+    default void config(int eid, Map<String, String> params, Map<String, ECSEntity> family) {
+        try {
+            ECSUtil.setConfig(this, params, family);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
 
     /** This method is called after world is ready **/
     default void initialize() {}
 
-    /** This method is called when entity is deleted **/
+    /** This method is called when entities is deleted **/
     default void delete(int eid) {}
-
-    default ECSMessage transmit() { return null; }
 }

@@ -10,14 +10,14 @@ public class Example {
         world.addSystem(new ExampleEntitySystem(world, 1000, ExampleComponent.cid));
 
         Element template = new Element("template").setAttribute("name", "ship")
-                .addContent(new Element("entity").setAttribute("name", "ship")
+                .addContent(new Element("entities").setAttribute("name", "ship")
                         .addContent(new Element("component")
                                 .setAttribute("type", "org.megastage.ecs.example.ExampleComponent1")
                                 .setAttribute("value", "1"))
                         .addContent(new Element("component")
                                 .setAttribute("type", "org.megastage.ecs.example.ExampleComponentA")
                                 .setAttribute("value", "A"))
-                ).addContent(new Element("entity").setAttribute("name", "dcpu")
+                ).addContent(new Element("entities").setAttribute("name", "dcpu")
                         .addContent(new Element("component")
                                 .setAttribute("type", "org.megastage.ecs.example.ExampleComponent1")
                                 .setAttribute("value", "11"))

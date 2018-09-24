@@ -1,12 +1,13 @@
 package org.megastage.ecs;
 
 import com.esotericsoftware.kryonet.Connection;
+import org.megastage.ecs.messages.ECSMessage;
 
 public class ECSConnection extends Connection {
-    public String nick = "Unknown";
     public State state = State.WaitingForLogin;
+    public ECSEntity player;
+    public ECSMessage received;
 
-    public int player;
     public int item;
 
     enum State {
